@@ -65,16 +65,15 @@ pub fn paragraph_to_html_css(par: &Paragraph, output: &mut String) {
                 }
                 *output += "</a>";
             },
-            // ParagraphItem::Code(code) => {
-            //     code_to_ansi(code, conf, c, output);
-            // },
+            ParagraphItem::Code(code) => {
+                code_to_html_css(code, output);
+            },
             ParagraphItem::List(list) => {
                 list_to_html_css(list, output);
             },
             ParagraphItem::Table(table) => {
                 table_to_html_css(table, output);
             },
-            _ => {},
         }
     }
     *output += "\n</p>\n";
@@ -150,7 +149,7 @@ pub fn table_to_html_css(table: &Table, output: &mut String) {
             *output += "<";
             *output += item_tag;
             *output += ">\n";
-            paragraph_to_html_css(&par, output);
+            paragraph_to_html_css(par, output);
             *output += "</";
             *output += item_tag;
             *output += ">\n";
@@ -158,6 +157,22 @@ pub fn table_to_html_css(table: &Table, output: &mut String) {
         *output += "</tr>\n";
     }
     *output += "</table>\n";
+}
+
+pub fn code_to_html_css(code: &Result<CodeBlock, CodeIdentError>, output: &mut String) {
+    match code {
+        Ok(code) => {
+            *output += "<pre><code lang=\"";
+            *output += &code.language;
+            *output += "\">\n";
+            *output += &code.code;
+            *output += "\n</code></pre>\n";
+        },
+        Err(_) => {
+            *output +=
+                "<span class=\"code-indentation-error\">incodoc code indentation error</span>";
+        },
+    }
 }
 
 pub fn emphasis_to_html_css(em: &Emphasis, output: &mut String) {
