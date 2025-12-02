@@ -21,7 +21,19 @@ pub fn doc_to_html(doc: &Doc, output: &mut String) {
 }
 
 pub fn nav_to_html(nav: &Nav, output: &mut String) {
-
+    *output += "<nav>\n";
+    if !nav.description.is_empty() {
+        *output += "<h1>\n";
+        *output += &nav.description;
+        *output += "</h1>\n";
+    }
+    for link in &nav.links {
+        link_to_html(link, output);
+    }
+    for sub in &nav.subs {
+        nav_to_html(sub, output);
+    }
+    *output += "</nav>\n";
 }
 
 pub fn section_to_html(section: &Section, output: &mut String) {

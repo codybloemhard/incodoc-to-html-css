@@ -4,6 +4,22 @@ use md_to_incodoc::parse_md_to_incodoc;
 
 const INPUT: &str =
 "
++++
+nav l0
+  link link text $ url
+  nav l1
+    link link text $ url
+    nav l2a
+      link link text $ url
+      link link text $ url
+    end
+    nav l2b
+      link link text $ url
+    end
+  end
+end
++++
+
 # H1
 
 test par with some ***emphasis*** yay.
