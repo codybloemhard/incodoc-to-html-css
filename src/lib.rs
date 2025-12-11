@@ -1,5 +1,7 @@
 use incodoc::*;
 
+use std::collections::HashSet;
+
 pub fn doc_to_html_string(doc: &Doc) -> String {
     let mut res = String::new();
     doc_to_html(doc, &mut res);
@@ -7,7 +9,9 @@ pub fn doc_to_html_string(doc: &Doc) -> String {
 }
 
 pub fn doc_to_html(doc: &Doc, output: &mut String) {
-    *output += "<html>\n";
+    *output += "<html";
+    tags_to_html(&doc.tags, true, false, output);
+    *output += "\n";
     *output += "<body>\n";
     for item in &doc.items {
         match item {
@@ -21,7 +25,9 @@ pub fn doc_to_html(doc: &Doc, output: &mut String) {
 }
 
 pub fn nav_to_html(nav: &Nav, output: &mut String) {
-    *output += "<nav>\n";
+    *output += "<nav";
+    tags_to_html(&nav.tags, true, false, output);
+    *output += "\n";
     if !nav.description.is_empty() {
         *output += "<h1>\n";
         *output += &nav.description;
@@ -37,7 +43,9 @@ pub fn nav_to_html(nav: &Nav, output: &mut String) {
 }
 
 pub fn section_to_html(section: &Section, output: &mut String) {
-    *output += "<section>\n";
+    *output += "<section";
+    tags_to_html(&section.tags, true, false, output);
+    *output += "\n";
     let level = match section.heading.level {
         0 => "1",
         1 => "2",
@@ -48,7 +56,8 @@ pub fn section_to_html(section: &Section, output: &mut String) {
     };
     *output += "<h";
     *output += level;
-    *output += ">\n";
+    tags_to_html(&section.heading.tags, true, false, output);
+    *output += "\n";
     for item in &section.heading.items {
         match item {
             HeadingItem::String(string) => *output += string,
@@ -68,7 +77,9 @@ pub fn section_to_html(section: &Section, output: &mut String) {
 }
 
 pub fn paragraph_to_html(par: &Paragraph, output: &mut String) {
-    *output += "<p>\n";
+    *output += "<p";
+    tags_to_html(&par.tags, true, false, output);
+    *output += "\n";
     for item in &par.items {
         match item {
             ParagraphItem::Text(text) => *output += text,
@@ -87,12 +98,8 @@ pub fn mtext_to_html(TextWithMeta { text, tags, .. }: &TextWithMeta, output: &mu
     // inline code is not handled differently
     // it will show up as a class
     // and the css can handle it
-    *output += "<span class=\"";
-    for tag in tags {
-        *output += tag;
-        *output += " ";
-    }
-    *output += "\">";
+    *output += "<span";
+    tags_to_html(tags, true, true, output);
     *output += text;
     *output += "</span>";
 }
@@ -103,14 +110,7 @@ pub fn link_to_html(link: & Link, output: &mut String)  {
     *output += &link.url;
     *output += "\" target=\"";
     *output += "_blank";
-    if !link.tags.is_empty() {
-        *output += "\" class=\"";
-        for tag in &link.tags {
-            *output += tag;
-            *output += " ";
-        }
-    }
-    *output += "\">";
+    tags_to_html(&link.tags, true, true, output);
     for item in &link.items {
         match item {
             LinkItem::String(text) => *output += text,
@@ -147,7 +147,9 @@ pub fn list_to_html(list: &List, output: &mut String) {
 }
 
 pub fn table_to_html(table: &Table, output: &mut String) {
-    *output += "<table>\n";
+    *output += "<table";
+    tags_to_html(&table.tags, true, false, output);
+    *output += "\n";
     for row in &table.rows {
         *output += "<tr>\n";
         let item_tag = if row.is_header {
@@ -197,6 +199,22 @@ pub fn emphasis_to_html(em: &Emphasis, output: &mut String) {
     *output += start;
     *output += &em.text;
     *output += end;
+}
+
+pub fn tags_to_html(tags: &HashSet<String>, end_tag: bool, backslash: bool, output: &mut String) {
+    if !tags.is_empty() {
+        *output += " class=\"";
+        for tag in tags {
+            *output += tag;
+            *output += " ";
+        }
+    }
+    if end_tag {
+        if backslash {
+            *output += "\"";
+        }
+        *output += ">";
+    }
 }
 
 #[cfg(test)]
