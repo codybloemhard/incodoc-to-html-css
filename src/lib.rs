@@ -1,6 +1,6 @@
 use incodoc::*;
 
-use std::collections::HashSet;
+use std::collections::{ HashSet, HashMap };
 
 pub fn doc_to_html_string(doc: &Doc) -> String {
     let mut res = String::new();
@@ -9,9 +9,23 @@ pub fn doc_to_html_string(doc: &Doc) -> String {
 }
 
 pub fn doc_to_html(doc: &Doc, output: &mut String) {
+    *output += "<!DOCTYPE html>\n";
     *output += "<html";
-    tags_to_html(&doc.tags, true, false, output);
-    *output += "\n";
+    tags_to_html(&doc.tags, false, false, output);
+    string_prop_to_html("lang", &doc.props, output);
+    *output += ">\n";
+    *output += "<head>\n";
+    if let Some(PropVal::String(css)) = doc.props.get("css") {
+        *output += "<link rel=\"stylesheet\" type=\"text/css\" href=\"";
+        *output += css;
+        *output += "\">\n";
+    }
+    if let Some(PropVal::String(title)) = doc.props.get("title") {
+        *output += "<title>\n";
+        *output += title;
+        *output += "\n</title>\n";
+    }
+    *output += "</head>\n";
     *output += "<body>\n";
     for item in &doc.items {
         match item {
@@ -224,6 +238,16 @@ pub fn tags_to_html(tags: &HashSet<String>, end_tag: bool, backslash: bool, outp
             *output += "\"";
         }
         *output += ">";
+    }
+}
+
+pub fn string_prop_to_html(prop: &str, props: &HashMap<String, PropVal>, output: &mut String) {
+    if let Some(PropVal::String(val)) = props.get(prop) {
+        *output += " ";
+        *output += prop;
+        *output += "=\"";
+        *output += val;
+        *output += "\"";
     }
 }
 

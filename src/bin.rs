@@ -5,6 +5,8 @@ use md_to_incodoc::parse_md_to_incodoc;
 const INPUT: &str =
 "
 +++
+prop lang en
+prop css style.css
 nav l0
   link link text $ url
   nav l1
